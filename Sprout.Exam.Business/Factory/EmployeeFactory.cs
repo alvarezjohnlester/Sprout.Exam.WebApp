@@ -19,7 +19,7 @@ namespace Sprout.Exam.Business.Factory
 		{
 			if(GetInstanceType(employeeType) == null)
 			{
-				_employeeTypes.Add(EmployeeType.Regular, employee);
+				_employeeTypes.Add(employeeType, employee);
 			}
 			else
 			{

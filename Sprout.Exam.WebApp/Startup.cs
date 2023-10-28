@@ -59,7 +59,7 @@ namespace Sprout.Exam.WebApp
 			{
 				EmployeeFactory factory = new EmployeeFactory();
 				factory.AddEmployee(EmployeeType.Contractual, new ContractualEmployee());
-				factory.AddEmployee(EmployeeType.Contractual, new RegularEmployee());
+				factory.AddEmployee(EmployeeType.Regular, new RegularEmployee());
 				return factory;
 			});
 			services.AddSingleton<EmployeeStrategy>();
