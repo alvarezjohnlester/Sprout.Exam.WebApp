@@ -12,6 +12,7 @@ using Sprout.Exam.Common.Model;
 using Sprout.Exam.Common.Interface;
 using Sprout.Exam.DataAccess.Repository;
 using Sprout.Exam.DataAccess;
+using AutoMapper;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -22,11 +23,13 @@ namespace Sprout.Exam.WebApp.Controllers
     {
         private readonly IEmployeeSalaryCalculator _employeeSalaryCalculator = null;
         private readonly IEmployeeRepository _employeeRepository = null;
+        private readonly IMapper _mapper;
         //constructor 
-        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository )
+        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository, IMapper mapper)
 		{
             _employeeSalaryCalculator = employeeSalaryCalculator;
             _employeeRepository = employeeRepository;
+            _mapper = mapper;
         }
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -38,11 +41,11 @@ namespace Sprout.Exam.WebApp.Controllers
 			try
 			{
                 var result = await _employeeRepository.GetAll();
-                return Ok(result);
+                List<EmployeeDto> empDto = _mapper.Map<List<EmployeeDto>>(result);
+                return Ok(empDto);
             }
 			catch (Exception e)
 			{
-
                 return StatusCode(500,e.Message);
 			}
             
@@ -58,11 +61,11 @@ namespace Sprout.Exam.WebApp.Controllers
             try
             {
                 var result = await _employeeRepository.Get(id);
-                return Ok(result);
+                EmployeeDto empDto = _mapper.Map<EmployeeDto>(result);
+                return Ok(empDto);
             }
             catch (Exception e)
             {
-
                 return StatusCode(500, e.Message);
             }
 

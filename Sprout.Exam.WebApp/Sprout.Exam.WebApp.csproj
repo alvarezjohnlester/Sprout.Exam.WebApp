@@ -30,7 +30,6 @@
 
   <ItemGroup>
     <Folder Include="ClientApp\src\views\employees\" />
-    <Folder Include="Mapper\" />
   </ItemGroup>
 
   <ItemGroup>

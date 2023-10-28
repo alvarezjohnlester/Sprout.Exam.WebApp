@@ -26,7 +26,7 @@ namespace Sprout.Exam.NunitTest
 			{
 				var result = _employeeRepository.GetAll().Result;
 			}
-			catch(Exception e)
+			catch
 			{
 				Assert.Fail();
 			}

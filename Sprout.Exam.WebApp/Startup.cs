@@ -1,3 +1,4 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,6 +20,7 @@ using Sprout.Exam.Common.Enums;
 using Sprout.Exam.Common.Interface;
 using Sprout.Exam.DataAccess.Repository;
 using Sprout.Exam.WebApp.Data;
+using Sprout.Exam.WebApp.Mapper;
 using Sprout.Exam.WebApp.Models;
 using System.Data;
 
@@ -65,9 +67,15 @@ namespace Sprout.Exam.WebApp
 			services.AddSingleton<EmployeeStrategy>();
 			services.AddSingleton<IEmployeeSalaryCalculator, EmployeeSalaryCalculator>();
 			services.AddTransient<IEmployeeRepository, EmployeeRepository>();
-
 			services.AddTransient<IDbConnection>((sp) => new SqlConnection(Configuration.GetConnectionString("DefaultConnection")));
 
+			//mapper
+			var config = new MapperConfiguration(mc =>
+			{
+				mc.AddProfile(new MappingProfile());
+			});
+			IMapper mapper = config.CreateMapper();
+			services.AddSingleton(mapper);
 
 			// In production, the React files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>

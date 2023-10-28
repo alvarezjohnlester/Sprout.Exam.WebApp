@@ -18,7 +18,7 @@ namespace Sprout.Exam.DataAccess.Repository
 			_dbConnection = dbconnection;
 		}
 		private string _tableName = "Employee";
-		public async Task<Employee> AddAsync(CreateEmployee item)
+		public Task<Employee> AddAsync(CreateEmployee item)
 		{
 			throw new NotImplementedException();
 		}
