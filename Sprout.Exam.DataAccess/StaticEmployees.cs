@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.DataAccess;
 
-namespace Sprout.Exam.WebApp
+namespace Sprout.Exam.DataAccess
 {
     public static class StaticEmployees
     {
-        public static List<EmployeeDto> ResultList = new()
+        public static List<Employee> ResultList =  new List<Employee>
         {
-            new EmployeeDto
+            new Employee
             {
                 Birthdate = "1993-03-25",
                 FullName = "Jane Doe",
@@ -18,7 +18,7 @@ namespace Sprout.Exam.WebApp
                 Tin = "123215413",
                 TypeId = 1
             },
-            new EmployeeDto
+            new Employee
             {
                 Birthdate = "1993-05-28",
                 FullName = "John Doe",

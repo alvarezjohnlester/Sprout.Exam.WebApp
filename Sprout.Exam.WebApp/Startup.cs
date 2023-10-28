@@ -15,6 +15,7 @@ using Sprout.Exam.Business.Factory;
 using Sprout.Exam.Business.Interface;
 using Sprout.Exam.Business.Strategy;
 using Sprout.Exam.Common.Interface;
+using Sprout.Exam.DataAccess.Repository;
 using Sprout.Exam.WebApp.Data;
 using Sprout.Exam.WebApp.Models;
 
@@ -54,6 +55,7 @@ namespace Sprout.Exam.WebApp
             services.AddSingleton<EmployeeFactory>();
             services.AddSingleton<EmployeeStrategy>();
             services.AddSingleton<IEmployeeSalaryCalculator, EmployeeSalaryCalculator>();
+            services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
 
 
             // In production, the React files will be served from this directory

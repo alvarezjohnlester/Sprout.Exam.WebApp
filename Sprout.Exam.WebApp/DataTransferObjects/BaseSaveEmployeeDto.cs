@@ -2,14 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sprout.Exam.Business.DataTransferObjects
+namespace Sprout.Exam.WebApp.DataTransferObjects
 {
-    public class EmployeeDto
+    public abstract class BaseSaveEmployeeDto
     {
-        public int Id { get; set; }
         public string FullName { get; set; }
-        public string Birthdate { get; set; }
         public string Tin { get; set; }
+        public DateTime Birthdate { get; set; }
         public int TypeId { get; set; }
     }
 }

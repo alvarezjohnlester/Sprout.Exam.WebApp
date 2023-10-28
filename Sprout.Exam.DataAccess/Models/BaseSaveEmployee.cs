@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sprout.Exam.Business.DataTransferObjects
+namespace Sprout.Exam.DataAccess
 {
-    public abstract class BaseSaveEmployeeDto
+    public abstract class BaseSaveEmployee
     {
         public string FullName { get; set; }
         public string Tin { get; set; }

@@ -5,11 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.WebApp.DataTransferObjects;
 using Sprout.Exam.Common.Enums;
 using Sprout.Exam.Business.Core;
 using Sprout.Exam.Common.Model;
 using Sprout.Exam.Common.Interface;
+using Sprout.Exam.DataAccess.Repository;
+using Sprout.Exam.DataAccess;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -19,10 +21,12 @@ namespace Sprout.Exam.WebApp.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeSalaryCalculator _employeeSalaryCalculator = null;
+        private readonly IEmployeeRepository _employeeRepository = null;
         //constructor 
-        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator )
+        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository )
 		{
             _employeeSalaryCalculator = employeeSalaryCalculator;
+            _employeeRepository = employeeRepository;
         }
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -31,8 +35,17 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList);
-            return Ok(result);
+			try
+			{
+                var result = await _employeeRepository.GetAll();
+                return Ok(result);
+            }
+			catch (Exception e)
+			{
+
+                return StatusCode(500,e.Message);
+			}
+            
         }
 
         /// <summary>
@@ -42,8 +55,18 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            return Ok(result);
+            try
+            {
+                var result = await _employeeRepository.Get(id);
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+
+                return StatusCode(500, e.Message);
+            }
+
+           
         }
 
         /// <summary>
@@ -53,7 +76,7 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(EditEmployeeDto input)
         {
-            var item = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == input.Id));
+            Employee item = await _employeeRepository.Get(input.Id);
             if (item == null) return NotFound();
             item.FullName = input.FullName;
             item.Tin = input.Tin;
@@ -72,14 +95,14 @@ namespace Sprout.Exam.WebApp.Controllers
 
            var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
 
-            StaticEmployees.ResultList.Add(new EmployeeDto
-            {
-                Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
-                FullName = input.FullName,
-                Id = id,
-                Tin = input.Tin,
-                TypeId = input.TypeId
-            });
+            //StaticEmployees.ResultList.Add(new EmployeeDto
+            //{
+            //    Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
+            //    FullName = input.FullName,
+            //    Id = id,
+            //    Tin = input.Tin,
+            //    TypeId = input.TypeId
+            //});
 
             return Created($"/api/employees/{id}", id);
         }
@@ -108,19 +131,15 @@ namespace Sprout.Exam.WebApp.Controllers
         /// <param name="workedDays"></param>
         /// <returns></returns>
         [HttpPost("{id}/calculate")]
-        public async Task<IActionResult> Calculate(int id,decimal absentDays,decimal workedDays)
+        public async Task<IActionResult> Calculate([FromBody] EmployeeSalaryRequest employeeSalaryRequest)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-
-            if (result == null) return NotFound();
-            var type = (EmployeeType) result.TypeId;
 			try
 			{
-                EmployeeSalaryRequest request = new EmployeeSalaryRequest();
-                request.EmployeeType = type;
-                request.AbsentDays = absentDays;
-                request.WorkedDays = workedDays;
-                decimal salary = _employeeSalaryCalculator.CalculateEmployeeSalary(request);
+                //EmployeeSalaryRequest request = new EmployeeSalaryRequest();
+                //request.EmployeeType = type;
+                //request.AbsentDays = absentDays;
+                //request.WorkedDays = workedDays;
+                decimal salary = await _employeeSalaryCalculator.CalculateEmployeeSalaryAsync(employeeSalaryRequest);
                 return Ok(salary);
             }
 			catch (Exception e)
