@@ -103,21 +103,18 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(CreateEmployeeDto input)
         {
+			try
+			{
+                CreateEmployee createEmployee = _mapper.Map<CreateEmployee>(input);
+                var id = await _employeeRepository.AddAsync(createEmployee);
 
-           var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
-
-            //StaticEmployees.ResultList.Add(new EmployeeDto
-            //{
-            //    Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
-            //    FullName = input.FullName,
-            //    Id = id,
-            //    Tin = input.Tin,
-            //    TypeId = input.TypeId
-            //});
-
-            return Created($"/api/employees/{id}", id);
+                return Created($"/api/employees/{id}", id);
+            }
+			catch (Exception e)
+			{
+                return StatusCode(500, e.Message);
+			}
         }
-
 
         /// <summary>
         /// Refactor this method to go through proper layers and perform soft deletion of an employee to the DB.
@@ -126,8 +123,15 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _employeeRepository.Remove(id);
-            return Ok(id);
+			try
+			{
+                await _employeeRepository.Remove(id);
+                return Ok(id);
+            }catch (Exception e)
+			{
+                return StatusCode(500, e.Message);
+			}
+            
         }
 
 
@@ -144,10 +148,6 @@ namespace Sprout.Exam.WebApp.Controllers
         {
 			try
 			{
-                //EmployeeSalaryRequest request = new EmployeeSalaryRequest();
-                //request.EmployeeType = type;
-                //request.AbsentDays = absentDays;
-                //request.WorkedDays = workedDays;
                 decimal salary = await _employeeSalaryCalculator.CalculateEmployeeSalaryAsync(employeeSalaryRequest);
                 return Ok(salary);
             }

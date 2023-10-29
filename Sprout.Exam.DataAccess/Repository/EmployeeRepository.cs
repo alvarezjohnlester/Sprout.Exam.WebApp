@@ -18,9 +18,20 @@ namespace Sprout.Exam.DataAccess.Repository
 			_dbConnection = dbconnection;
 		}
 		private string _tableName = "Employee";
-		public Task<Employee> AddAsync(CreateEmployee item)
+		public async Task<int> AddAsync(CreateEmployee item)
 		{
-			throw new NotImplementedException();
+			string query = $"INSERT INTO {_tableName} (FullName, Birthdate, TIN, EmployeeTypeId, IsDeleted) " +
+				$"values (@FullName, @Birthdate, @TIN, @EmployeeTypeId, 0); " +
+				$"SELECT CAST(SCOPE_IDENTITY() as int)";
+
+			var parameters = new DynamicParameters();
+			parameters.Add("FullName",item.FullName, DbType.String);
+			parameters.Add("Birthdate", item.Birthdate.ToString("yyyy-MM-dd"), DbType.Date);
+			parameters.Add("TIN", item.Tin, DbType.String);
+			parameters.Add("EmployeeTypeId", item.EmployeeTypeId, DbType.Int32);
+
+			int employee = await _dbConnection.QuerySingleAsync<int>(query, parameters);
+			return employee;
 		}
 
 		public async Task<Employee> Get(int id)

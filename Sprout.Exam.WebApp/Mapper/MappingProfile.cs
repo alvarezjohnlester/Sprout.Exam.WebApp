@@ -19,6 +19,9 @@ namespace Sprout.Exam.WebApp.Mapper
 			CreateMap<EditEmployee, EditEmployeeDto>()
 				.ForMember(dest => dest.TypeId, act => act.MapFrom(src => src.EmployeeTypeId))
 				.ReverseMap();
+			CreateMap<CreateEmployee, CreateEmployeeDto>()
+				.ForMember(dest => dest.TypeId, act => act.MapFrom(src => src.EmployeeTypeId))
+				.ReverseMap();
 
 		}
 	}

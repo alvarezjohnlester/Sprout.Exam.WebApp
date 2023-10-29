@@ -10,7 +10,7 @@ namespace Sprout.Exam.DataAccess.Repository
 	{
 		Task<List<Employee>> GetAll();
 		Task<Employee> Get(int id);
-		Task<Employee> AddAsync(CreateEmployee item);
+		Task<int> AddAsync(CreateEmployee item);
 		Task Remove(int id);
 		Task Update(EditEmployee item);
 	}
