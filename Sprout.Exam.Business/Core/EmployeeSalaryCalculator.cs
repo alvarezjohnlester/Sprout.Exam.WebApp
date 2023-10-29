@@ -25,10 +25,10 @@ namespace Sprout.Exam.Business.Core
 		public async Task<decimal> CalculateEmployeeSalaryAsync(EmployeeSalaryRequest employeeSalaryRequest)
 		{
 			decimal salary = decimal.Zero;
-			var result =await _employeeRepository.Get(employeeSalaryRequest.Id);
+			var result = await _employeeRepository.Get(employeeSalaryRequest.Id);
 
 			if (result == null) throw  new Exception("Employee doesn't exist!");
-			EmployeeType type = (EmployeeType)result.TypeId;
+			EmployeeType type = (EmployeeType)result.EmployeeTypeId;
 			salary = _employeeStrategy.Calculate(type, employeeSalaryRequest.AbsentDays, employeeSalaryRequest.WorkedDays);
 
 			return salary;

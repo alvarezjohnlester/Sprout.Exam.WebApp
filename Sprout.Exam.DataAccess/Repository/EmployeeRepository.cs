@@ -25,27 +25,47 @@ namespace Sprout.Exam.DataAccess.Repository
 
 		public async Task<Employee> Get(int id)
 		{
-			Employee result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-			return result;
+			string query = $"select * from {_tableName} where Id = @Id and IsDeleted = 0;";
+			var parameters = new DynamicParameters();
+			parameters.Add("Id", id, DbType.Int32);
+
+			Employee employee = await _dbConnection.QuerySingleAsync<Employee>(query, parameters);
+			return employee;
 		}
 
 		public async Task<List<Employee>> GetAll()
 		{
-			string query = $"select * from {_tableName}";
+			string query = $"select * from {_tableName} where IsDeleted = 0;";
 
 			var result = await _dbConnection.QueryAsync<Employee>(query);
 			List<Employee> employees = result.ToList();
 			return employees;
 		}
 
-		public Task Remove(int id)
+		public async Task Remove(int id)
 		{
-			throw new NotImplementedException();
+			string query = $"update {_tableName} set IsDeleted = 1 where Id = @Id ;";
+			var parameters = new DynamicParameters();
+			parameters.Add("Id", id, DbType.Int32);
+			await _dbConnection.ExecuteAsync(query, parameters);
 		}
 
-		public Task<bool> Update(EditEmployee item)
+		public async Task Update(EditEmployee item)
 		{
-			throw new NotImplementedException();
+			string query = $"update {_tableName} " +
+				$"set FullName = @FullName, " +
+				$"Tin = @Tin, " +
+				$"Birthdate = @Birthdate, " +
+				$"EmployeeTypeId = @EmployeeTypeId " +
+				$"where Id = @Id;";
+
+			var parameters = new DynamicParameters();
+			parameters.Add("FullName", item.FullName, DbType.String);
+			parameters.Add("Tin", item.Tin, DbType.String);
+			parameters.Add("Birthdate", item.Birthdate.ToString("yyyy-MM-dd"), DbType.Date);
+			parameters.Add("EmployeeTypeId", item.EmployeeTypeId, DbType.Int32);
+			parameters.Add("Id", item.Id, DbType.Int32);
+			await _dbConnection.ExecuteAsync(query, parameters);
 		}
 	}
 }

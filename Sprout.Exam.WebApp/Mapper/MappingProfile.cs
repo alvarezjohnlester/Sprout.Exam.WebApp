@@ -12,7 +12,14 @@ namespace Sprout.Exam.WebApp.Mapper
 	{
 		public MappingProfile()
 		{
-			CreateMap<Employee, EmployeeDto>().ReverseMap();
+			CreateMap<Employee, EmployeeDto>()
+				.ForMember(dest => dest.TypeId, act => act.MapFrom(src => src.EmployeeTypeId))
+				.ForMember(dest => dest.Birthdate, act => act.MapFrom(src => src.Birthdate.ToString("yyyy-MM-dd")))
+				.ReverseMap();
+			CreateMap<EditEmployee, EditEmployeeDto>()
+				.ForMember(dest => dest.TypeId, act => act.MapFrom(src => src.EmployeeTypeId))
+				.ReverseMap();
+
 		}
 	}
 }

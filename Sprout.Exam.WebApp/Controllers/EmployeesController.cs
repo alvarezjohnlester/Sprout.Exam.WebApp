@@ -79,13 +79,21 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(EditEmployeeDto input)
         {
-            Employee item = await _employeeRepository.Get(input.Id);
-            if (item == null) return NotFound();
-            item.FullName = input.FullName;
-            item.Tin = input.Tin;
-            item.Birthdate = input.Birthdate.ToString("yyyy-MM-dd");
-            item.TypeId = input.TypeId;
-            return Ok(item);
+			try
+			{
+                Employee item = await _employeeRepository.Get(input.Id);
+                if (item == null) return NotFound();
+                EditEmployee editEmployee = _mapper.Map<EditEmployee>(input);
+                await _employeeRepository.Update(editEmployee);
+                item = await _employeeRepository.Get(input.Id);
+                EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(item);
+                return Ok(employeeDto);
+            }
+			catch (Exception e)
+			{
+                return StatusCode(500, e.Message);
+            }
+            
         }
 
         /// <summary>
@@ -118,9 +126,7 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            if (result == null) return NotFound();
-            StaticEmployees.ResultList.RemoveAll(m => m.Id == id);
+            await _employeeRepository.Remove(id);
             return Ok(id);
         }
 

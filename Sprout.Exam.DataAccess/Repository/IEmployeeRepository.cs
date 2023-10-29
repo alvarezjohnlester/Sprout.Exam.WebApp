@@ -12,6 +12,6 @@ namespace Sprout.Exam.DataAccess.Repository
 		Task<Employee> Get(int id);
 		Task<Employee> AddAsync(CreateEmployee item);
 		Task Remove(int id);
-		Task<bool> Update(EditEmployee item);
+		Task Update(EditEmployee item);
 	}
 }
