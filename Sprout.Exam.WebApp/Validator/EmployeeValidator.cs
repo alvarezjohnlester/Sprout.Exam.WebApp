@@ -58,13 +58,13 @@ namespace Sprout.Exam.WebApp.Validator
 				if (employeeSalaryRequest.AbsentDays < 0 )
 				{
 					response.HasError = true;
-					response.ErrorMessage = "Absent Days must be 0 or greater than!";
+					response.ErrorMessage = "Absent Days must be greater than or equals to 0!";
 					return response;
 				}
 				if (employeeSalaryRequest.WorkedDays < 0)
 				{
 					response.HasError = true;
-					response.ErrorMessage = "Worked Days must be 0 or greater than!";
+					response.ErrorMessage = "Worked Days must be greater than or equals to 0!";
 					return response;
 				}
 				if (employeeSalaryRequest.Id <= 0)
@@ -76,7 +76,7 @@ namespace Sprout.Exam.WebApp.Validator
 				if (employeeSalaryRequest.Salary < 0)
 				{
 					response.HasError = true;
-					response.ErrorMessage = "Salary must be 0 or greater than!";
+					response.ErrorMessage = "Salary must be greater than or equals to 0!";
 					return response;
 				}
 				response.HasError = false;
