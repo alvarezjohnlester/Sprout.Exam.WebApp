@@ -7,8 +7,10 @@ namespace Sprout.Exam.Common.Model
 {
 	public class EmployeeSalaryRequest
 	{
-		public EmployeeType EmployeeType { get; set; }
+		public int Id { get; set; }
 		public decimal  AbsentDays { get; set; }
 		public decimal  WorkedDays { get; set; }
+		public decimal  Salary { get; set; }
+
 	}
 }

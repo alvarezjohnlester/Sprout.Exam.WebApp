@@ -9,18 +9,17 @@ namespace Sprout.Exam.Business.Factory
 {
 	public class EmployeeFactory
 	{
-		public Dictionary<EmployeeType, IEmployee> _employeeTypes = new Dictionary<EmployeeType, IEmployee>();
+		private Dictionary<EmployeeType, IEmployee> _employeeTypes;
 
 		public EmployeeFactory()
 		{
-			_employeeTypes.Add(EmployeeType.Regular,new RegularEmployee());
-			_employeeTypes.Add(EmployeeType.Contractual, new ContractualEmployee());
+			_employeeTypes = new Dictionary<EmployeeType, IEmployee>();
 		}
 		public void AddEmployee(EmployeeType employeeType, IEmployee employee)
 		{
 			if(GetInstanceType(employeeType) == null)
 			{
-				_employeeTypes.Add(EmployeeType.Regular, employee);
+				_employeeTypes.Add(employeeType, employee);
 			}
 			else
 			{

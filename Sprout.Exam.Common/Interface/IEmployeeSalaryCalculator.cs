@@ -2,11 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Sprout.Exam.Common.Interface
 {
 	public interface IEmployeeSalaryCalculator
 	{
-		public decimal CalculateEmployeeSalary(EmployeeSalaryRequest employeeSalaryRequest);
+		public Task<decimal> CalculateEmployeeSalaryAsync(EmployeeSalaryRequest employeeSalaryRequest);
 	}
 }

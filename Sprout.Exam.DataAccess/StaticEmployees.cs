@@ -2,29 +2,29 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.DataAccess;
 
-namespace Sprout.Exam.WebApp
+namespace Sprout.Exam.DataAccess
 {
     public static class StaticEmployees
     {
-        public static List<EmployeeDto> ResultList = new()
+        public static List<Employee> ResultList =  new List<Employee>
         {
-            new EmployeeDto
+            new Employee
             {
-                Birthdate = "1993-03-25",
+                Birthdate = new DateTime(1993,03,25),
                 FullName = "Jane Doe",
                 Id = 1,
                 Tin = "123215413",
-                TypeId = 1
+                EmployeeTypeId = 1
             },
-            new EmployeeDto
+            new Employee
             {
-                Birthdate = "1993-05-28",
+                Birthdate =new DateTime(1993,05,28),
                 FullName = "John Doe",
                 Id = 2,
                 Tin = "957125412",
-                TypeId = 2
+                EmployeeTypeId = 2
             }
         };
     }

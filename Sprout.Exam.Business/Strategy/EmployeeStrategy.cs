@@ -1,6 +1,7 @@
 ﻿using Sprout.Exam.Business.Factory;
 using Sprout.Exam.Business.Interface;
 using Sprout.Exam.Common.Enums;
+using Sprout.Exam.Common.Model;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,7 +16,7 @@ namespace Sprout.Exam.Business.Strategy
 			_employeeFactory = employeeFactory;
 		}
 
-		public decimal Calculate(EmployeeType employeeType, decimal absentDays, decimal workedDays)
+		public decimal Calculate(EmployeeType employeeType, EmployeeSalaryRequest employeeSalaryRequest)
 		{
 			IEmployee employee = _employeeFactory.GetInstanceType(employeeType);
 			if (employee == null)
@@ -23,7 +24,7 @@ namespace Sprout.Exam.Business.Strategy
 				throw new Exception("Employee doesn't exist!");
 			}
 
-			decimal salary = employee.CalculateSalary(absentDays, workedDays);
+			decimal salary = employee.CalculateSalary(employeeSalaryRequest);
 
 			return salary;
 		}

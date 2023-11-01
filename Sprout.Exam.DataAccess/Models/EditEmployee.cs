@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Sprout.Exam.Business.DataTransferObjects
+namespace Sprout.Exam.DataAccess
 {
-    public class EditEmployeeDto: BaseSaveEmployeeDto
+    public class EditEmployee: BaseSaveEmployee
     {
         public int Id { get; set; }
     }

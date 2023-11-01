@@ -5,11 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Sprout.Exam.Business.DataTransferObjects;
+using Sprout.Exam.WebApp.DataTransferObjects;
 using Sprout.Exam.Common.Enums;
 using Sprout.Exam.Business.Core;
 using Sprout.Exam.Common.Model;
 using Sprout.Exam.Common.Interface;
+using Sprout.Exam.DataAccess.Repository;
+using Sprout.Exam.DataAccess;
+using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Sprout.Exam.WebApp.Validator;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -19,10 +24,18 @@ namespace Sprout.Exam.WebApp.Controllers
     public class EmployeesController : ControllerBase
     {
         private readonly IEmployeeSalaryCalculator _employeeSalaryCalculator = null;
+        private readonly IEmployeeRepository _employeeRepository = null;
+        private readonly IMapper _mapper;
+        private readonly ILogger<EmployeesController> _logger;
+        private readonly EmployeeValidator _employeeValidator;
         //constructor 
-        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator )
+        public EmployeesController(ILogger<EmployeesController> logger, IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository, IMapper mapper, EmployeeValidator employeeValidator)
 		{
             _employeeSalaryCalculator = employeeSalaryCalculator;
+            _employeeRepository = employeeRepository;
+            _mapper = mapper;
+            _logger = logger;
+            _employeeValidator = employeeValidator;
         }
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -31,8 +44,19 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList);
-            return Ok(result);
+			try
+			{
+                var result = await _employeeRepository.GetAllAsync();
+                List<EmployeeDto> empDto = _mapper.Map<List<EmployeeDto>>(result);
+                _logger.LogInformation("Successfully get all data");
+                return Ok(empDto);
+            }
+			catch (Exception e)
+			{
+                _logger.LogError(e, "Error in fetching data.");
+                return StatusCode(500,e.Message);
+			}
+            
         }
 
         /// <summary>
@@ -42,8 +66,20 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            return Ok(result);
+            try
+            {
+                var result = await _employeeRepository.GetAsync(id);
+                EmployeeDto empDto = _mapper.Map<EmployeeDto>(result);
+                _logger.LogInformation("Successfully get data");
+                return Ok(empDto);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Error in fetching data.");
+                return StatusCode(500, e.Message);
+            }
+
+           
         }
 
         /// <summary>
@@ -53,13 +89,24 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(EditEmployeeDto input)
         {
-            var item = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == input.Id));
-            if (item == null) return NotFound();
-            item.FullName = input.FullName;
-            item.Tin = input.Tin;
-            item.Birthdate = input.Birthdate.ToString("yyyy-MM-dd");
-            item.TypeId = input.TypeId;
-            return Ok(item);
+			try
+			{
+                Employee item = await _employeeRepository.GetAsync(input.Id);
+                _logger.LogInformation("Data not found");
+                if (item == null) return NotFound();
+
+                EditEmployee editEmployee = _mapper.Map<EditEmployee>(input);
+                await _employeeRepository.UpdateAsync(editEmployee);
+                item = await _employeeRepository.GetAsync(input.Id);
+                EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(item);
+                _logger.LogInformation("Updated successfully.");
+                return Ok(employeeDto);
+            }
+			catch (Exception e)
+			{
+                _logger.LogError(e, "Error in updating data.");
+                return StatusCode(500, e.Message);
+            }
         }
 
         /// <summary>
@@ -69,21 +116,26 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(CreateEmployeeDto input)
         {
-
-           var id = await Task.FromResult(StaticEmployees.ResultList.Max(m => m.Id) + 1);
-
-            StaticEmployees.ResultList.Add(new EmployeeDto
-            {
-                Birthdate = input.Birthdate.ToString("yyyy-MM-dd"),
-                FullName = input.FullName,
-                Id = id,
-                Tin = input.Tin,
-                TypeId = input.TypeId
-            });
-
-            return Created($"/api/employees/{id}", id);
+			try
+			{
+                CreateEmployee createEmployee = _mapper.Map<CreateEmployee>(input);
+                var val =  _employeeValidator.ValidateRequest(createEmployee);
+				if (val.HasError)
+				{
+                    _logger.LogError(val.ErrorMessage);
+                    return BadRequest(val.ErrorMessage);
+                }
+               
+                var id = await _employeeRepository.AddAsync(createEmployee);
+                _logger.LogInformation("Data create.");
+                return Created($"/api/employees/{id}", id);
+            }
+			catch (Exception e)
+			{
+                _logger.LogError(e, "Error in creating employee.");
+                return StatusCode(500, e.Message);
+			}
         }
-
 
         /// <summary>
         /// Refactor this method to go through proper layers and perform soft deletion of an employee to the DB.
@@ -92,10 +144,17 @@ namespace Sprout.Exam.WebApp.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-            if (result == null) return NotFound();
-            StaticEmployees.ResultList.RemoveAll(m => m.Id == id);
-            return Ok(id);
+			try
+			{
+                await _employeeRepository.RemoveAsync(id);
+                _logger.LogInformation("Data deleted.");
+                return Ok(id);
+            }
+            catch (Exception e)
+			{
+                _logger.LogError(e, "Error in deleting employee.");
+                return StatusCode(500, e.Message);
+			}
         }
 
 
@@ -108,23 +167,23 @@ namespace Sprout.Exam.WebApp.Controllers
         /// <param name="workedDays"></param>
         /// <returns></returns>
         [HttpPost("{id}/calculate")]
-        public async Task<IActionResult> Calculate(int id,decimal absentDays,decimal workedDays)
+        public async Task<IActionResult> Calculate([FromBody] EmployeeSalaryRequest employeeSalaryRequest)
         {
-            var result = await Task.FromResult(StaticEmployees.ResultList.FirstOrDefault(m => m.Id == id));
-
-            if (result == null) return NotFound();
-            var type = (EmployeeType) result.TypeId;
 			try
 			{
-                EmployeeSalaryRequest request = new EmployeeSalaryRequest();
-                request.EmployeeType = type;
-                request.AbsentDays = absentDays;
-                request.WorkedDays = workedDays;
-                decimal salary = _employeeSalaryCalculator.CalculateEmployeeSalary(request);
-                return Ok(salary);
+                var val = _employeeValidator.ValidateRequest(employeeSalaryRequest);
+                if (val.HasError)
+                {
+                    _logger.LogError(val.ErrorMessage);
+                    return BadRequest(val.ErrorMessage);
+                }
+                decimal salary = await _employeeSalaryCalculator.CalculateEmployeeSalaryAsync(employeeSalaryRequest);
+                _logger.LogInformation("Successfully calculated.");
+                return Ok(salary.ToString("0.00"));
             }
 			catch (Exception e)
 			{
+                _logger.LogError(e, "Error in calculating employee salary.");
                 return Ok(e.Message);
             }
         }
