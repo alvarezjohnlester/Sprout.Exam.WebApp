@@ -13,7 +13,7 @@ namespace Sprout.Exam.DataAccess.Repository
 	{
 
 		private readonly IDbConnection _dbConnection;
-		public EmployeeRepository(IDbConnection dbconnection)
+		public EmployeeRepository(IDbConnection dbconnection )
 		{
 			_dbConnection = dbconnection;
 		}
@@ -34,7 +34,7 @@ namespace Sprout.Exam.DataAccess.Repository
 			return employee;
 		}
 
-		public async Task<Employee> Get(int id)
+		public async Task<Employee> GetAsync(int id)
 		{
 			string query = $"select * from {_tableName} where Id = @Id and IsDeleted = 0;";
 			var parameters = new DynamicParameters();
@@ -44,7 +44,7 @@ namespace Sprout.Exam.DataAccess.Repository
 			return employee;
 		}
 
-		public async Task<List<Employee>> GetAll()
+		public async Task<List<Employee>> GetAllAsync()
 		{
 			string query = $"select * from {_tableName} where IsDeleted = 0;";
 
@@ -53,7 +53,7 @@ namespace Sprout.Exam.DataAccess.Repository
 			return employees;
 		}
 
-		public async Task Remove(int id)
+		public async Task RemoveAsync(int id)
 		{
 			string query = $"update {_tableName} set IsDeleted = 1 where Id = @Id ;";
 			var parameters = new DynamicParameters();
@@ -61,7 +61,7 @@ namespace Sprout.Exam.DataAccess.Repository
 			await _dbConnection.ExecuteAsync(query, parameters);
 		}
 
-		public async Task Update(EditEmployee item)
+		public async Task UpdateAsync(EditEmployee item)
 		{
 			string query = $"update {_tableName} " +
 				$"set FullName = @FullName, " +

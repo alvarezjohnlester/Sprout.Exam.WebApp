@@ -16,6 +16,10 @@ namespace Sprout.Exam.Business.Core
 	{
 		private EmployeeStrategy _employeeStrategy;
 		private IEmployeeRepository _employeeRepository;
+		private Dictionary<EmployeeType, decimal> _employeeSalary = new Dictionary<EmployeeType, decimal> { 
+			{EmployeeType.Contractual, 500.00m},
+			{EmployeeType.Regular, 20000.00m}
+		};
 		public EmployeeSalaryCalculator(EmployeeStrategy employeeStrategy, IEmployeeRepository employeeRepository)
 		{
 			_employeeStrategy = employeeStrategy;
@@ -24,15 +28,26 @@ namespace Sprout.Exam.Business.Core
 
 		public async Task<decimal> CalculateEmployeeSalaryAsync(EmployeeSalaryRequest employeeSalaryRequest)
 		{
-			decimal salary = decimal.Zero;
-			var result = await _employeeRepository.Get(employeeSalaryRequest.Id);
-
+			decimal Monthlysalary = decimal.Zero;
+			//getting employee
+			var result = await _employeeRepository.GetAsync(employeeSalaryRequest.Id);
 			if (result == null) throw  new Exception("Employee doesn't exist!");
+			
 			EmployeeType type = (EmployeeType)result.EmployeeTypeId;
-			salary = _employeeStrategy.Calculate(type, employeeSalaryRequest.AbsentDays, employeeSalaryRequest.WorkedDays);
+			//for improvements
+			// put salary details in table 
+			// for now we use static salary
+			employeeSalaryRequest.Salary = GetEmployeeSalary(type);
+			Monthlysalary = _employeeStrategy.Calculate(type, employeeSalaryRequest);
 
-			return salary;
+			return Monthlysalary;
 		}
 
+		private decimal GetEmployeeSalary(EmployeeType employeeType)
+		{
+			decimal salary = decimal.Zero;
+			_employeeSalary.TryGetValue(employeeType, out salary);
+			return salary;
+		}
 	}
 }

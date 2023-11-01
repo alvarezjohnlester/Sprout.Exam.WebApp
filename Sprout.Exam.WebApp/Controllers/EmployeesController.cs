@@ -13,6 +13,8 @@ using Sprout.Exam.Common.Interface;
 using Sprout.Exam.DataAccess.Repository;
 using Sprout.Exam.DataAccess;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
+using Sprout.Exam.WebApp.Validator;
 
 namespace Sprout.Exam.WebApp.Controllers
 {
@@ -24,12 +26,16 @@ namespace Sprout.Exam.WebApp.Controllers
         private readonly IEmployeeSalaryCalculator _employeeSalaryCalculator = null;
         private readonly IEmployeeRepository _employeeRepository = null;
         private readonly IMapper _mapper;
+        private readonly ILogger<EmployeesController> _logger;
+        private readonly EmployeeValidator _employeeValidator;
         //constructor 
-        public EmployeesController(IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository, IMapper mapper)
+        public EmployeesController(ILogger<EmployeesController> logger, IEmployeeSalaryCalculator employeeSalaryCalculator, IEmployeeRepository employeeRepository, IMapper mapper, EmployeeValidator employeeValidator)
 		{
             _employeeSalaryCalculator = employeeSalaryCalculator;
             _employeeRepository = employeeRepository;
             _mapper = mapper;
+            _logger = logger;
+            _employeeValidator = employeeValidator;
         }
         /// <summary>
         /// Refactor this method to go through proper layers and fetch from the DB.
@@ -40,12 +46,14 @@ namespace Sprout.Exam.WebApp.Controllers
         {
 			try
 			{
-                var result = await _employeeRepository.GetAll();
+                var result = await _employeeRepository.GetAllAsync();
                 List<EmployeeDto> empDto = _mapper.Map<List<EmployeeDto>>(result);
+                _logger.LogInformation("Successfully get all data");
                 return Ok(empDto);
             }
 			catch (Exception e)
 			{
+                _logger.LogError(e, "Error in fetching data.");
                 return StatusCode(500,e.Message);
 			}
             
@@ -60,12 +68,14 @@ namespace Sprout.Exam.WebApp.Controllers
         {
             try
             {
-                var result = await _employeeRepository.Get(id);
+                var result = await _employeeRepository.GetAsync(id);
                 EmployeeDto empDto = _mapper.Map<EmployeeDto>(result);
+                _logger.LogInformation("Successfully get data");
                 return Ok(empDto);
             }
             catch (Exception e)
             {
+                _logger.LogError(e, "Error in fetching data.");
                 return StatusCode(500, e.Message);
             }
 
@@ -81,19 +91,22 @@ namespace Sprout.Exam.WebApp.Controllers
         {
 			try
 			{
-                Employee item = await _employeeRepository.Get(input.Id);
+                Employee item = await _employeeRepository.GetAsync(input.Id);
+                _logger.LogInformation("Data not found");
                 if (item == null) return NotFound();
+
                 EditEmployee editEmployee = _mapper.Map<EditEmployee>(input);
-                await _employeeRepository.Update(editEmployee);
-                item = await _employeeRepository.Get(input.Id);
+                await _employeeRepository.UpdateAsync(editEmployee);
+                item = await _employeeRepository.GetAsync(input.Id);
                 EmployeeDto employeeDto = _mapper.Map<EmployeeDto>(item);
+                _logger.LogInformation("Updated successfully.");
                 return Ok(employeeDto);
             }
 			catch (Exception e)
 			{
+                _logger.LogError(e, "Error in updating data.");
                 return StatusCode(500, e.Message);
             }
-            
         }
 
         /// <summary>
@@ -106,12 +119,20 @@ namespace Sprout.Exam.WebApp.Controllers
 			try
 			{
                 CreateEmployee createEmployee = _mapper.Map<CreateEmployee>(input);
+                var val =  _employeeValidator.ValidateRequest(createEmployee);
+				if (val.HasError)
+				{
+                    _logger.LogError(val.ErrorMessage);
+                    return BadRequest(val.ErrorMessage);
+                }
+               
                 var id = await _employeeRepository.AddAsync(createEmployee);
-
+                _logger.LogInformation("Data create.");
                 return Created($"/api/employees/{id}", id);
             }
 			catch (Exception e)
 			{
+                _logger.LogError(e, "Error in creating employee.");
                 return StatusCode(500, e.Message);
 			}
         }
@@ -125,13 +146,15 @@ namespace Sprout.Exam.WebApp.Controllers
         {
 			try
 			{
-                await _employeeRepository.Remove(id);
+                await _employeeRepository.RemoveAsync(id);
+                _logger.LogInformation("Data deleted.");
                 return Ok(id);
-            }catch (Exception e)
+            }
+            catch (Exception e)
 			{
+                _logger.LogError(e, "Error in deleting employee.");
                 return StatusCode(500, e.Message);
 			}
-            
         }
 
 
@@ -148,11 +171,19 @@ namespace Sprout.Exam.WebApp.Controllers
         {
 			try
 			{
+                var val = _employeeValidator.ValidateRequest(employeeSalaryRequest);
+                if (val.HasError)
+                {
+                    _logger.LogError(val.ErrorMessage);
+                    return BadRequest(val.ErrorMessage);
+                }
                 decimal salary = await _employeeSalaryCalculator.CalculateEmployeeSalaryAsync(employeeSalaryRequest);
-                return Ok(salary);
+                _logger.LogInformation("Successfully calculated.");
+                return Ok(salary.ToString("0.00"));
             }
 			catch (Exception e)
 			{
+                _logger.LogError(e, "Error in calculating employee salary.");
                 return Ok(e.Message);
             }
         }

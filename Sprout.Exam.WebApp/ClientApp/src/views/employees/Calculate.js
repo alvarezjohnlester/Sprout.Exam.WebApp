@@ -18,6 +18,12 @@ export class EmployeeCalculate extends Component {
 
   handleSubmit(e){
       e.preventDefault();
+      if (this.state.absentDays == null || this.state.absentDays == "") {
+          this.state.absentDays = 0;
+      }
+      if (this.state.workedDays == null || this.state.workedDays == "") {
+          this.state.workedDays = 0;
+      }
       this.calculateSalary();
   }
 
@@ -97,6 +103,7 @@ export class EmployeeCalculate extends Component {
 
   async calculateSalary() {
     this.setState({ loadingCalculate: true });
+     
     const token = await authService.getAccessToken();
     const requestOptions = {
         method: 'POST',
@@ -105,7 +112,7 @@ export class EmployeeCalculate extends Component {
     };
     const response = await fetch('api/employees/' + this.state.id + '/calculate',requestOptions);
     const data = await response.json();
-    this.setState({ loadingCalculate: false,netIncome: data });
+      this.setState({ loadingCalculate: false, netIncome: data.toFixed(2) });
   }
 
   async getEmployee(id) {

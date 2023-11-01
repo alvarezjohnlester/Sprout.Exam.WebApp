@@ -22,6 +22,7 @@ using Sprout.Exam.DataAccess.Repository;
 using Sprout.Exam.WebApp.Data;
 using Sprout.Exam.WebApp.Mapper;
 using Sprout.Exam.WebApp.Models;
+using Sprout.Exam.WebApp.Validator;
 using System.Data;
 
 namespace Sprout.Exam.WebApp
@@ -65,6 +66,7 @@ namespace Sprout.Exam.WebApp
 				return factory;
 			});
 			services.AddSingleton<EmployeeStrategy>();
+			services.AddSingleton<EmployeeValidator>();
 			services.AddSingleton<IEmployeeSalaryCalculator, EmployeeSalaryCalculator>();
 			services.AddTransient<IEmployeeRepository, EmployeeRepository>();
 			services.AddTransient<IDbConnection>((sp) => new SqlConnection(Configuration.GetConnectionString("DefaultConnection")));
