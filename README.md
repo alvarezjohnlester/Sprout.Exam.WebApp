@@ -8,7 +8,7 @@
   - Install SQL server/ SQL Express 2016 or up.
   - Visual Studio 2019 with .net 5 Installed
   - Updated node js
-    - ( **Note**: if you are going to use node version 17 above add "NODE_OPTIONS=--openssl-legacy-provider" on start and build under scripts on package.json.).
+    - ( **Note**: if you are going to use node version 17 above, add "NODE_OPTIONS=--openssl-legacy-provider" on start and build under scripts on package.json.).
   - Run npm --install
   - Restore SproutExamDb database backup file located on database folder .
   - Change the connection string credentials on appsetting to your local db credentials.
